@@ -7,7 +7,11 @@ import select
 import binascii
 
 ICMP_ECHO_REQUEST = 8
-
+rttMin = 10000000
+rttMax = 0
+rttList = []
+recPacks = 0
+sentPacks = 0
 
 def checksum(string):
     csum = 0
@@ -52,6 +56,10 @@ def receive_one_ping(mySocket, ID, timeout, destAddr):
         # TODO: handle different response type and error code, display error message to the user
         headerType = header_pieces[0]
         if headerType == 0:
+            # part for extra credit
+            global recPacks
+            recPacks = recPacks + 1
+            ec_helper(rtt)
             return rtt
         elif headerType == 8:
             print("Pass - echo request (type 8)")
@@ -85,6 +93,8 @@ def send_one_ping(mySocket, destAddr, ID):
     packet = header + data
     # AF_INET address must be tuple, not str # Both LISTS and TUPLES consist of a number of objects
     mySocket.sendto(packet, (destAddr, 1))
+    global sentPacks
+    sentPacks = sentPacks + 1
     # which can be referenced by their position number within the object.
 
 
@@ -113,6 +123,26 @@ def ping(host, timeout=1):
         print(delay)
         time.sleep(1)  # one second
     return delay
+
+# calculates stats for extra credit part
+def ec_helper(rtt):
+    global rttMin
+    global rttMax
+    global rttList
+    global recPacks
+    global sentPacks
+    rttList.append(rtt)
+    if rtt < rttMin:
+        rttMin = rtt
+    if rtt > rttMax:
+        rttMax = rtt
+    rttAvg = sum(rttList) / len(rttList)
+    packLoss = ((sentPacks - recPacks) / sentPacks) * 100
+    print('Minimum RTT: {:f}'.format(rttMin))
+    print('Maximum RTT: {:f}'.format(rttMax))
+    print('Average RTT: {:f}'.format(rttAvg))
+    print('Packet Loss: {:f}%'.format(packLoss))
+    print('---------------')
 
 
 ping(sys.argv[1])
