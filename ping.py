@@ -38,13 +38,30 @@ def receive_one_ping(mySocket, ID, timeout, destAddr):
         what_ready = select.select([mySocket], [], [], timeout)
         if what_ready[0] == []:  # Timeout
             return "Request timed out."
+
+        time_recieved = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
 
         # TODO: read the packet and parse the source IP address, you will need this part for traceroute
+        header_pieces = struct.unpack('bbHHh',recPacket[20:28])
 
         # TODO: calculate and return the round trip time for this ping
+        time_sent = struct.unpack('d',recPacket[28:(28 + struct.calcsize('d'))])[0]
+        rtt = time_recieved - time_sent
 
         # TODO: handle different response type and error code, display error message to the user
+        headerType = header_pieces[0]
+        if headerType == 0:
+            return rtt
+        elif headerType == 8:
+            print("Pass - echo request (type 8)")
+            return
+        elif headerType == 3:
+            print("Error: port unreachable (type 3)")
+            return
+        else:
+            print('Error: unrecognized type (type {:d})'.format(headerType))
+            return
 
 
 def send_one_ping(mySocket, destAddr, ID):
@@ -98,4 +115,4 @@ def ping(host, timeout=1):
     return delay
 
 
-ping("google.com")
+ping(sys.argv[1])
