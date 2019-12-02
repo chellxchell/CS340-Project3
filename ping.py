@@ -7,8 +7,6 @@ import select
 import binascii
 
 ICMP_ECHO_REQUEST = 8
-rttMin = 10000000
-rttMax = 0
 rttList = []
 recPacks = 0
 sentPacks = 0
@@ -132,17 +130,12 @@ def ec_helper(rtt):
     global recPacks
     global sentPacks
     rttList.append(rtt)
-    if rtt < rttMin:
-        rttMin = rtt
-    if rtt > rttMax:
-        rttMax = rtt
     rttAvg = sum(rttList) / len(rttList)
     packLoss = ((sentPacks - recPacks) / sentPacks) * 100
-    print('Minimum RTT: {:f}'.format(rttMin))
-    print('Maximum RTT: {:f}'.format(rttMax))
+    print('Minimum RTT: {:f}'.format(min(rttList)))
+    print('Maximum RTT: {:f}'.format(max(rttList)))
     print('Average RTT: {:f}'.format(rttAvg))
     print('Packet Loss: {:f}%'.format(packLoss))
     print('---------------')
-
 
 ping(sys.argv[1])
