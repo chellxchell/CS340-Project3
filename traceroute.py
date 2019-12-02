@@ -82,7 +82,6 @@ def get_route(hostname):
             except socket.timeout:
                 continue
             else:
-
                 # TODO: parse and handle different response type
                 # Hint: use wireshark to get the byte location of the response type
                 header_pieces = struct.unpack('bbHHh',recPacket[20:28])
@@ -92,11 +91,9 @@ def get_route(hostname):
                     print("Trip time: {:f}".format(trip))
                     return trip
                 elif header_pieces[0] == 11:
-                    time_sent = struct.unpack('d',recPacket[28:(28 + struct.calcsize('d'))])[0]
-                    print("Error: TTL exceeded (type 11)")
+                    print("Error: TTL exceeded (type 11) -- IP addr: {:s}".format(addr[0]))
                 elif header_pieces[0] == 3:
-                    time_sent = struct.unpack('d',recPacket[28:(28 + struct.calcsize('d'))])[0]
-                    print("Error: destination unreachable (type 3)")
+                    print("Error: destination unreachable (type 3) -- IP addr: {:s}".format(addr[0]))
                 else:
                     print("Error: unexpected type (type {:d})".format(header_pieces[0]))
                     break
