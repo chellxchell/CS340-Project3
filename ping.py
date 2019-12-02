@@ -124,8 +124,6 @@ def ping(host, timeout=1):
 
 # calculates stats for extra credit part
 def ec_helper(rtt):
-    global rttMin
-    global rttMax
     global rttList
     global recPacks
     global sentPacks
